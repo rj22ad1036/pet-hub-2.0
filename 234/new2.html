@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Include the enhanced CSS here */
+        /* General reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            background-image: url('petphoto.jpg'); /* Replace with your image URL */
+            background-size: cover; /* Ensures the image covers the entire background */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents repeating the image */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Login container */
+        .login-container {
+            background-color: #fce7b7;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        .login-container:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Title */
+        .login-container h2 {
+            text-align: center;
+            color: #333333;
+            margin-bottom: 20px;
+            font-weight: 500;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .login-text h2 {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+
+        /* Form labels */
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: #555555;
+            margin-bottom: 8px;
+            margin-top: 15px;
+        }
+
+        /* Input styling */
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fafafa;
+            transition: border-color 0.3s ease;
+            font-size: 1rem;
+            color: #333333;
+        }
+
+        input:focus {
+            border-color: #c64c8b;
+            outline: none;
+            background-color: #ffffff;
+        }
+
+        /* Error messages */
+        .error {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* Button styling */
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #eb588e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #f78bb3;
+        }
+
+        button:focus {
+            outline: none;
+            background-color: #eb588e;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 30px;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2 id="login-text">Login</h2>
+        <form id="loginForm">
+            <labelfor="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter your username">
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter your email">
+            <div id="emailError" class="error"></div>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter your password">
+            <div id="passwordError" class="error"></div>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <script type="module">
+
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+            import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+                apiKey: "AIzaSyCFnBSCP9itgXfJ54PA3JYaFjRcR1jpGFo",
+                authDomain: "pet-care-web-application.firebaseapp.com",
+                databaseURL: "https://pet-care-web-application-default-rtdb.firebaseio.com",
+                projectId: "pet-care-web-application",
+                storageBucket: "pet-care-web-application.appspot.com",
+                messagingSenderId: "275661497366",
+                appId: "1:275661497366:web:7cf15c6fd8e2b98b230137",
+                measurementId: "G-Z9YM3KEQRJ"
+            };
+
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            
+
+
+            document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Clear previous error messages
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('passwordError').textContent = '';
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            let valid = true;
+
+            // Email validation
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Email is required';
+                valid = false;
+            } else if (!/\S+@\S+\.\S+/.test(email)) {
+                document.getElementById('emailError').textContent = 'Invalid email format';
+                valid = false;
+            }
+
+            // Password validation
+            if (!password) {
+                document.getElementById('passwordError').textContent = 'Password is required';
+                valid = false;
+            } else if (password.length < 6) {
+                document.getElementById('passwordError').textContent = 'Password must be at least 6 characters long';
+                valid = false;
+            }
+
+            
+        
+
+            if (valid) {
+                alert('Login successful!');
+                console.log(username,email, password);
+                set(ref(db, 'user/' + document.getElementById("username").value),
+                {
+                username: document.getElementById("username").value,
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value
+                
+                
+    
+            });
+            setTimeout(function() {
+            // Code to execute after 1 second (1000 milliseconds)
+            console.log("1 second has passed");
+            window.location.href='http://127.0.0.1:5501/pet-care-website-template/pet-care-website-template/index.html';
+            }, 5000);
+            
+            }
+        })
+    </script>
+
+</body>
+</html>
